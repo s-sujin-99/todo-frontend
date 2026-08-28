@@ -1,0 +1,79 @@
+{
+  // ─── 저장 시 자동 정리 ───────────────────────────────────────────
+  // 서식은 Prettier, 자동수정 가능한 품질 문제는 ESLint가 담당한다.
+  // 이 둘이 저장 때마다 돌면 커밋 훅에서 걸릴 일이 거의 없어진다.
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    // import 정렬은 Prettier 플러그인이 하므로 VS Code 기능은 끈다(충돌 방지).
+    "source.organizeImports": "never"
+  },
+
+  // ─── ESLint ─────────────────────────────────────────────────────
+  // ESLint 9 Flat Config 사용
+  "eslint.useFlatConfig": true,
+  // 폴리레포 구조에서 각 파일의 기준 디렉토리를 자동 판별하게 한다.
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+
+  // ─── TypeScript ─────────────────────────────────────────────────
+  // 에디터가 쓰는 TS 버전을 프로젝트 것으로 고정한다.
+  // 고정하지 않으면 "에디터는 멀쩡한데 tsc는 에러"가 나서 원인 찾기 어려워진다.
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  // import 경로를 @/ 별칭으로 자동 완성한다.
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  // 파일 이동/이름변경 시 import 경로를 자동 갱신한다.
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  // 타입 추론 결과를 인라인으로 보여준다(AI가 쓴 코드 검토 시 특히 유용).
+  "typescript.inlayHints.parameterNames.enabled": "literals",
+
+  // ─── Tailwind CSS v4 ────────────────────────────────────────────
+  // v4는 CSS 파일이 설정 진입점이라 @theme 등 표준이 아닌 at-rule을 쓴다.
+  "css.lint.unknownAtRules": "ignore",
+  "tailwindCSS.experimental.configFile": "app/globals.css",
+  // cn()/cva() 안의 문자열도 Tailwind 자동완성 대상에 포함시킨다.
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\(([^)]*)\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\(([^)]*)\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["clsx\(([^)]*)\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ],
+  "tailwindCSS.classAttributes": [
+    "class",
+    "className",
+    "ngClass",
+    "class:list"
+  ],
+
+  // ─── 파일 처리 ──────────────────────────────────────────────────
+  // .gitattributes / .editorconfig / prettier 설정과 개행을 일치시킨다.
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  // 빌드 산출물은 검색 결과에서 제외한다(검색 속도 및 오탐 방지).
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/out": true,
+    "**/coverage": true,
+    "**/package-lock.json": true,
+    "**/*.tsbuildinfo": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.next/**": true
+  },
+  // 설정 파일들을 package.json 아래로 접어 탐색기를 정리한다.
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, .npmrc, eslint.config.*, prettier.config.*, .prettierignore, commitlint.config.*, .lintstagedrc.*, .secretlintrc.*, .secretlintignore, .editorconfig, .gitattributes, .gitignore, tsconfig.json, next.config.*, postcss.config.*, components.json, next-env.d.ts",
+    "*.tsx": "$(capture).module.css, $(capture).test.tsx, $(capture).stories.tsx"
+  }
+}

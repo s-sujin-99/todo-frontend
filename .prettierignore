@@ -1,0 +1,23 @@
+# 빌드 산출물
+.next/
+out/
+build/
+dist/
+coverage/
+
+# 의존성
+node_modules/
+
+# 자동 생성 파일
+next-env.d.ts
+*.tsbuildinfo
+package-lock.json
+
+# 백엔드(Spring Boot)와 IDE 메타데이터는 Prettier 대상이 아니다
+../todo-backend/
+.metadata/
+
+# 기타
+public/
+*.min.js
+*.min.css

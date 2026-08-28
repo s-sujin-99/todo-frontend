@@ -1,0 +1,21 @@
+# 모든 텍스트 파일의 개행을 LF로 통일한다.
+# Windows의 core.autocrlf=true 설정보다 이 파일이 우선하므로,
+# Prettier가 LF로 저장한 결과와 git이 저장하는 내용이 항상 일치한다.
+* text=auto eol=lf
+
+# 바이너리 파일은 개행 변환 대상에서 제외한다.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.avif  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.pdf   binary
+
+# 잠금 파일은 diff에서 접어둔다(리뷰 노이즈 감소).
+package-lock.json linguist-generated=true -diff

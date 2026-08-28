@@ -1,0 +1,22 @@
+# 에디터 간 기본 서식을 통일한다.
+# 이 저장소는 VS Code(프론트)와 Eclipse(백엔드)를 함께 쓰므로,
+# Prettier가 관여하지 않는 파일까지 일관성을 유지하기 위해 필요하다.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Markdown은 줄 끝 공백 2칸이 줄바꿈 문법이므로 제거하지 않는다.
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{json,jsonc,yml,yaml}]
+indent_size = 2
+
+[Makefile]
+indent_style = tab

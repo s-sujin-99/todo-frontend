@@ -1,0 +1,16 @@
+# push 직전 전체 검사 — 코드가 로컬을 떠나기 전 마지막 방어선.
+#
+# pre-commit이 "바뀐 파일"만 본다면, 여기서는 프로젝트 전체를 본다.
+# 개별 커밋은 통과했지만 조합된 결과가 깨지는 경우를 잡기 위함이다.
+# 빌드는 시간이 오래 걸리므로 CI에 맡기고, 여기서는 빠른 검사만 수행한다.
+
+echo "[pre-push] 타입 검사..."
+npm run type-check
+
+echo "[pre-push] 린트 검사..."
+npm run lint
+
+echo "[pre-push] 비밀정보 스캔..."
+npm run secretlint
+
+echo "[pre-push] 통과"

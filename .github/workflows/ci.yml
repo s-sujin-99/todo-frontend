@@ -1,0 +1,54 @@
+# 프론트엔드 CI
+#
+# 로컬 git 훅은 --no-verify로 우회할 수 있고, npm install을 하지 않은 환경에는
+# 아예 설치되지도 않는다. 따라서 "반드시 통과해야 하는 게이트"는 여기다.
+# 실행하는 검사는 로컬 `npm run validate`와 동일하게 유지한다.
+
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+
+# 같은 브랜치에서 새 푸시가 오면 이전 실행을 취소한다(러너 시간 절약).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: 검사 및 빌드
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 소스 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node 설치
+        uses: actions/setup-node@v4
+        with:
+          # .nvmrc를 단일 기준으로 삼아 로컬과 CI의 Node 버전을 일치시킨다.
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: 의존성 설치
+        # npm ci는 package-lock.json을 그대로 재현한다(npm install과 달리 lock을 수정하지 않음).
+        run: npm ci
+
+      - name: 타입 검사
+        run: npm run type-check
+
+      - name: 린트
+        run: npm run lint
+
+      - name: 서식 검사
+        run: npm run format:check
+
+      - name: 비밀정보 스캔
+        run: npm run secretlint
+
+      # 빌드는 가장 느리므로 마지막에 둔다.
+      # 앞 단계에서 실패하면 여기까지 오지 않아 피드백이 빨라진다.
+      - name: 프로덕션 빌드
+        run: npm run build
