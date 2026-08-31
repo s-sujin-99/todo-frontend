@@ -4,6 +4,11 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8
 
 export const AUTH_TOKEN_KEY = "todo_token";
 
+// FR-A07: 정적 export라 프론트가 백엔드 오리진으로 풀 페이지 이동한다(fetch로 시작할 수 없다).
+export function getGoogleLoginUrl(): string {
+  return `${API_BASE_URL}/oauth2/authorization/google`;
+}
+
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(AUTH_TOKEN_KEY);
@@ -17,8 +22,19 @@ export function clearAuthToken(): void {
   localStorage.removeItem(AUTH_TOKEN_KEY);
 }
 
-// Phase 6의 useAuth가 이 이벤트를 구독해 로그인 화면으로 이동하고 만료 안내를 표시한다(인수 14).
+// Phase 6의 useAuth가 이 이벤트를 구독해 캐시된 사용자 정보를 지운다(인수 14).
+// 리다이렉트·만료 안내는 AuthGuard 한 곳에서만 처리한다 — 여기서 같이 라우팅까지 하면
+// AuthGuard의 "미인증이면 /login으로" 이펙트와 경합해 나중에 실행되는 쪽이 쿼리스트링을 지워버린다.
 export const AUTH_EXPIRED_EVENT = "todo-auth-expired";
+
+// AuthGuard가 이 플래그로 "방금 401을 받아 로그아웃됐는지"와 "애초에 로그인한 적이 없는지"를 구분한다.
+let authExpiredFlag = false;
+
+export function consumeAuthExpiredFlag(): boolean {
+  const value = authExpiredFlag;
+  authExpiredFlag = false;
+  return value;
+}
 
 export class ApiError extends Error {
   constructor(
@@ -62,6 +78,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   if (response.status === 401) {
     clearAuthToken();
     if (typeof window !== "undefined") {
+      authExpiredFlag = true;
       window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT));
     }
   }
@@ -98,6 +115,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   VALIDATION_ERROR: "입력값이 올바르지 않습니다. 표시된 항목을 확인한 뒤 다시 시도해주세요.",
   EMAIL_ALREADY_EXISTS: "이미 가입된 이메일입니다. 로그인을 시도해주세요.",
   INVALID_CREDENTIALS: "이메일 또는 비밀번호가 올바르지 않습니다. 다시 입력해주세요.",
+  INVALID_OAUTH_CODE: "구글 로그인 코드가 유효하지 않거나 만료되었습니다. 다시 로그인해주세요.",
 };
 
 const DEFAULT_ERROR_MESSAGE = "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
