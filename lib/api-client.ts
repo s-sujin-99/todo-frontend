@@ -108,6 +108,77 @@ export const apiClient = {
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
 };
 
+async function toApiError(response: Response): Promise<ApiError> {
+  const body: ErrorResponseBody | null = await response.json().catch(() => null);
+  return new ApiError(
+    response.status,
+    body?.code ?? "UNKNOWN_ERROR",
+    body?.message ?? "요청을 처리하지 못했습니다.",
+    body?.errors ?? [],
+  );
+}
+
+// FR-F01/F02: multipart/form-data라 request()의 JSON.stringify·Content-Type 처리를 그대로 쓸 수 없다.
+export async function uploadAttachment<T>(todoId: number, file: File): Promise<T> {
+  const token = getAuthToken();
+  const headers = new Headers();
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  const formData = new FormData();
+  formData.append("file", file);
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/api/todos/${todoId}/attachments`, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+  } catch {
+    throw new ApiError(0, "NETWORK_ERROR", "서버에 연결할 수 없습니다.");
+  }
+
+  if (response.status === 401) {
+    clearAuthToken();
+    if (typeof window !== "undefined") {
+      authExpiredFlag = true;
+      window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT));
+    }
+  }
+  if (!response.ok) {
+    throw await toApiError(response);
+  }
+  return (await response.json()) as T;
+}
+
+// OPEN-06 확정(서버 스트리밍 통일): 소유권 검증을 거친 뒤 파일 내용을 blob으로 직접 받는다.
+// 이미지 썸네일(FR-F07)도 이 함수로 내용을 가져와 object URL을 만든다.
+export async function fetchAttachmentBlob(id: number): Promise<Blob> {
+  const token = getAuthToken();
+  const headers = new Headers();
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/api/attachments/${id}/download`, { headers });
+  } catch {
+    throw new ApiError(0, "NETWORK_ERROR", "서버에 연결할 수 없습니다.");
+  }
+  if (!response.ok) {
+    throw await toApiError(response);
+  }
+  return response.blob();
+}
+
+export async function downloadAttachment(id: number, filename: string): Promise<void> {
+  const blob = await fetchAttachmentBlob(id);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 // FR-U08: "무슨 일이 있었는지 + 다음에 무엇을 할지"를 한 문장으로 안내한다.
 const ERROR_MESSAGES: Record<string, string> = {
   NETWORK_ERROR: "서버에 연결할 수 없습니다. 네트워크 상태를 확인한 뒤 다시 시도해주세요.",
@@ -117,6 +188,11 @@ const ERROR_MESSAGES: Record<string, string> = {
   INVALID_CREDENTIALS: "이메일 또는 비밀번호가 올바르지 않습니다. 다시 입력해주세요.",
   INVALID_OAUTH_CODE: "구글 로그인 코드가 유효하지 않거나 만료되었습니다. 다시 로그인해주세요.",
   INVALID_RESET_TOKEN: "유효하지 않거나 만료된 링크입니다. 비밀번호 재설정을 다시 요청해주세요.",
+  INVALID_FILE:
+    "지원하지 않는 파일이거나 내용이 확장자와 일치하지 않습니다. 다른 파일을 선택해주세요.",
+  TOO_MANY_ATTACHMENTS: "첨부파일은 할 일 하나에 최대 5개까지 등록할 수 있습니다.",
+  FILE_TOO_LARGE: "파일 크기는 10MB를 넘을 수 없습니다. 더 작은 파일을 선택해주세요.",
+  ATTACHMENT_NOT_FOUND: "해당 첨부파일을 찾을 수 없거나 삭제되었습니다. 목록을 새로고침해주세요.",
 };
 
 const DEFAULT_ERROR_MESSAGE = "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
