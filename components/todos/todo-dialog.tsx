@@ -88,7 +88,7 @@ function TodoForm({ todo, onSubmit, isSubmitting }: TodoFormProps) {
   }
 
   return (
-    <form onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4">
+    <form onSubmit={(event) => void handleSubmit(event)} className="flex min-w-0 flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="todo-title">제목</Label>
         <Input
