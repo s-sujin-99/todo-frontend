@@ -28,7 +28,9 @@ function LoginForm() {
       ? "구글 로그인에 실패했습니다. 다시 시도해주세요."
       : searchParams.get("expired") === "1"
         ? "로그인이 만료되었습니다. 다시 로그인해주세요."
-        : null;
+        : searchParams.get("reset") === "1"
+          ? "비밀번호가 변경되었습니다. 새 비밀번호로 로그인해주세요."
+          : null;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,6 +80,13 @@ function LoginForm() {
           {isSubmitting ? "로그인 중..." : "로그인"}
         </Button>
       </form>
+
+      <Link
+        href="/forgot-password"
+        className="text-center text-sm text-muted-foreground underline underline-offset-4"
+      >
+        비밀번호를 잊으셨나요?
+      </Link>
 
       <Button variant="outline" asChild>
         <a href={getGoogleLoginUrl()}>구글로 로그인</a>

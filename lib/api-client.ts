@@ -116,6 +116,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   EMAIL_ALREADY_EXISTS: "이미 가입된 이메일입니다. 로그인을 시도해주세요.",
   INVALID_CREDENTIALS: "이메일 또는 비밀번호가 올바르지 않습니다. 다시 입력해주세요.",
   INVALID_OAUTH_CODE: "구글 로그인 코드가 유효하지 않거나 만료되었습니다. 다시 로그인해주세요.",
+  INVALID_RESET_TOKEN: "유효하지 않거나 만료된 링크입니다. 비밀번호 재설정을 다시 요청해주세요.",
 };
 
 const DEFAULT_ERROR_MESSAGE = "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
