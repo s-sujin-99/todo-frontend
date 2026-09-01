@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AttachmentPanel } from "@/components/todos/attachment-panel";
 
 // 다이얼로그를 열 때만 불러온다 — 초기 번들에서 Tiptap을 분리한다(ROADMAP Phase 7 주의).
 const RichTextEditor = dynamic(
@@ -130,6 +131,15 @@ function TodoForm({ todo, onSubmit, isSubmitting }: TodoFormProps) {
           </Select>
         </div>
       </div>
+
+      {/* FR-F03 주의(ROADMAP Phase 7): 첨부는 todoId가 있어야 업로드할 수 있어 생성 중에는 안내만 보여준다. */}
+      {todo ? (
+        <AttachmentPanel todoId={todo.id} />
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          첨부파일은 저장한 뒤 이 할 일을 다시 열어 추가할 수 있습니다.
+        </p>
+      )}
 
       <DialogFooter>
         <Button type="submit" disabled={isSubmitting}>

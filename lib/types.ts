@@ -26,6 +26,15 @@ export interface TodoResponse {
   priority: Priority;
   createdAt: string;
   updatedAt: string;
+  attachmentCount: number;
+}
+
+export interface AttachmentResponse {
+  id: number;
+  originalName: string;
+  contentType: string;
+  sizeBytes: number;
+  createdAt: string;
 }
 
 export interface TodoRequest {

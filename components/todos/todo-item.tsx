@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Trash2 } from "lucide-react";
+import { Paperclip, Pencil, Trash2 } from "lucide-react";
 
 import { PRIORITY_LABELS, stripHtml } from "@/lib/todo-utils";
 import type { TodoResponse } from "@/lib/types";
@@ -50,6 +50,13 @@ export function TodoItem({
             {PRIORITY_LABELS[todo.priority]}
           </span>
           {todo.dueDate && <span className="text-xs text-muted-foreground">{todo.dueDate}</span>}
+          {/* FR-F08: 첨부가 있는 할 일에 클립 아이콘과 개수를 표시한다. */}
+          {todo.attachmentCount > 0 && (
+            <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+              <Paperclip className="size-3" />
+              {todo.attachmentCount}
+            </span>
+          )}
         </div>
         {preview && <p className="mt-1 truncate text-xs text-muted-foreground">{preview}</p>}
       </div>
