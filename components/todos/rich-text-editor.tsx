@@ -126,8 +126,10 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     onUpdate: ({ editor: currentEditor }) => onChange(currentEditor.getHTML()),
     editorProps: {
       attributes: {
+        // prose 계열 클래스는 @tailwindcss/typography 없이는 아무 효과가 없다(죽은 클래스).
+        // Tailwind Preflight가 ol/ul의 list-style을 지우므로, 여기서 직접 되살린다.
         class:
-          "prose prose-sm dark:prose-invert max-w-none min-h-32 px-3 py-2 focus:outline-none [&_a]:text-primary [&_a]:underline",
+          "max-w-none min-h-32 px-3 py-2 focus:outline-none [&_a]:text-primary [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6",
       },
     },
   });
