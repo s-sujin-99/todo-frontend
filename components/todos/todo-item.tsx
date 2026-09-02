@@ -36,7 +36,12 @@ export function TodoItem({
         aria-label={todo.completed ? "완료 해제" : "완료로 표시"}
       />
 
-      <div className="min-w-0 flex-1">
+      {/* PRD 8장: 목록 항목 클릭으로도 수정 다이얼로그(상세보기)가 열려야 한다. */}
+      <button
+        type="button"
+        onClick={() => onEdit(todo)}
+        className="-m-1 min-w-0 flex-1 rounded-md p-1 text-left transition-colors outline-none hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/50"
+      >
         <div className="flex flex-wrap items-center gap-2">
           <span
             className={cn(
@@ -59,7 +64,7 @@ export function TodoItem({
           )}
         </div>
         {preview && <p className="mt-1 truncate text-xs text-muted-foreground">{preview}</p>}
-      </div>
+      </button>
 
       <div className="flex shrink-0 items-center gap-1 self-end sm:self-auto">
         <Button variant="ghost" size="icon-sm" aria-label="수정" onClick={() => onEdit(todo)}>
