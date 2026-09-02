@@ -193,6 +193,9 @@ const ERROR_MESSAGES: Record<string, string> = {
   TOO_MANY_ATTACHMENTS: "첨부파일은 할 일 하나에 최대 5개까지 등록할 수 있습니다.",
   FILE_TOO_LARGE: "파일 크기는 10MB를 넘을 수 없습니다. 더 작은 파일을 선택해주세요.",
   ATTACHMENT_NOT_FOUND: "해당 첨부파일을 찾을 수 없거나 삭제되었습니다. 목록을 새로고침해주세요.",
+  ACCOUNT_DISABLED: "비활성화된 계정입니다. 관리자에게 문의해주세요.",
+  SELF_DEACTIVATION_NOT_ALLOWED: "자기 자신은 비활성화할 수 없습니다.",
+  USER_NOT_FOUND: "해당 사용자를 찾을 수 없습니다. 목록을 새로고침해주세요.",
 };
 
 const DEFAULT_ERROR_MESSAGE = "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { LogOut } from "lucide-react";
+import { LogOut, Shield } from "lucide-react";
 
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,13 @@ export function Header() {
           할 일 관리
         </Link>
         <div className="flex items-center gap-1">
+          {user?.role === "ADMIN" && (
+            <Button variant="ghost" size="icon-sm" aria-label="관리자" asChild>
+              <Link href="/admin">
+                <Shield />
+              </Link>
+            </Button>
+          )}
           {user && (
             <Button variant="ghost" size="icon-sm" aria-label="로그아웃" onClick={logout}>
               <LogOut />
