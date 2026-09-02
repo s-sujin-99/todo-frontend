@@ -22,6 +22,7 @@ import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
 import { LoadingState } from "@/components/loading-state";
 import { Pagination } from "@/components/pagination";
+import { TodoDetailDialog } from "@/components/todos/todo-detail-dialog";
 import { TodoDialog } from "@/components/todos/todo-dialog";
 import { TodoFilters } from "@/components/todos/todo-filters";
 import { TodoItem } from "@/components/todos/todo-item";
@@ -50,6 +51,8 @@ function TodosPageContent() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState<TodoResponse | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [viewingTodo, setViewingTodo] = useState<TodoResponse | null>(null);
 
   function updateParams(next: { status?: TodoStatusFilter; sort?: TodoSortOption; page?: number }) {
     const params = new URLSearchParams(searchParams);
@@ -86,6 +89,11 @@ function TodosPageContent() {
   function openEditDialog(todo: TodoResponse) {
     setEditingTodo(todo);
     setDialogOpen(true);
+  }
+
+  function openDetailDialog(todo: TodoResponse) {
+    setViewingTodo(todo);
+    setDetailOpen(true);
   }
 
   async function handleDialogSubmit(request: TodoRequest) {
@@ -133,6 +141,7 @@ function TodosPageContent() {
                 key={todo.id}
                 todo={todo}
                 onToggle={(id) => toggleMutation.mutate(id)}
+                onView={openDetailDialog}
                 onEdit={openEditDialog}
                 onDelete={(id) => deleteMutation.mutate(id)}
                 isToggling={toggleMutation.isPending && toggleMutation.variables === todo.id}
@@ -152,6 +161,13 @@ function TodosPageContent() {
           description="새 할 일 버튼을 눌러 첫 항목을 추가해보세요."
         />
       )}
+
+      <TodoDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        todo={viewingTodo}
+        onEdit={openEditDialog}
+      />
 
       <TodoDialog
         open={dialogOpen}

@@ -20,9 +20,11 @@ const MAX_ATTACHMENTS = 5;
 
 interface AttachmentPanelProps {
   todoId: number;
+  /** 상세보기(읽기 전용)에서는 업로드·삭제를 숨기고 다운로드만 허용한다. */
+  readOnly?: boolean;
 }
 
-export function AttachmentPanel({ todoId }: AttachmentPanelProps) {
+export function AttachmentPanel({ todoId, readOnly = false }: AttachmentPanelProps) {
   const { data: attachments } = useAttachments(todoId);
   const uploadMutation = useUploadAttachment(todoId);
   const deleteMutation = useDeleteAttachment(todoId);
@@ -53,9 +55,11 @@ export function AttachmentPanel({ todoId }: AttachmentPanelProps) {
         <span className="flex items-center gap-1 text-sm font-medium text-foreground">
           <Paperclip className="size-4" /> 첨부파일
         </span>
-        <span className="text-xs text-muted-foreground">
-          {count}/{MAX_ATTACHMENTS}
-        </span>
+        {!readOnly && (
+          <span className="text-xs text-muted-foreground">
+            {count}/{MAX_ATTACHMENTS}
+          </span>
+        )}
       </div>
 
       {attachments && attachments.length > 0 && (
@@ -87,22 +91,28 @@ export function AttachmentPanel({ todoId }: AttachmentPanelProps) {
               >
                 <Download />
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                aria-label={`${attachment.originalName} 삭제`}
-                disabled={deleteMutation.isPending}
-                onClick={() => deleteMutation.mutate(attachment.id)}
-              >
-                <Trash2 />
-              </Button>
+              {!readOnly && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={`${attachment.originalName} 삭제`}
+                  disabled={deleteMutation.isPending}
+                  onClick={() => deleteMutation.mutate(attachment.id)}
+                >
+                  <Trash2 />
+                </Button>
+              )}
             </li>
           ))}
         </ul>
       )}
 
-      {!atLimit && (
+      {readOnly && count === 0 && (
+        <p className="text-xs text-muted-foreground">첨부파일이 없습니다.</p>
+      )}
+
+      {!readOnly && !atLimit && (
         <div
           role="button"
           tabIndex={0}

@@ -14,6 +14,8 @@ import {
   Underline,
 } from "lucide-react";
 
+import { RICH_TEXT_CONTENT_CLASS } from "@/lib/todo-utils";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 interface RichTextEditorProps {
@@ -126,11 +128,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     onUpdate: ({ editor: currentEditor }) => onChange(currentEditor.getHTML()),
     editorProps: {
       attributes: {
-        // prose 계열 클래스는 @tailwindcss/typography 없이는 아무 효과가 없다(죽은 클래스).
-        // Tailwind Preflight가 ol/ul의 list-style과 h2의 font-size/font-weight를 지우므로,
-        // 여기서 직접 되살린다. blockquote도 브라우저 기본값만으로는 시각적 구분이 없어 테두리를 더한다.
-        class:
-          "max-w-none min-h-32 px-3 py-2 focus:outline-none [&_a]:text-primary [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6 [&_h2]:text-lg [&_h2]:font-bold [&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground",
+        class: cn("min-h-32 max-w-none px-3 py-2 focus:outline-none", RICH_TEXT_CONTENT_CLASS),
       },
     },
   });

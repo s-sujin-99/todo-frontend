@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface TodoItemProps {
   todo: TodoResponse;
   onToggle: (id: number) => void;
+  onView: (todo: TodoResponse) => void;
   onEdit: (todo: TodoResponse) => void;
   onDelete: (id: number) => void;
   isToggling: boolean;
@@ -20,6 +21,7 @@ interface TodoItemProps {
 export function TodoItem({
   todo,
   onToggle,
+  onView,
   onEdit,
   onDelete,
   isToggling,
@@ -36,10 +38,10 @@ export function TodoItem({
         aria-label={todo.completed ? "완료 해제" : "완료로 표시"}
       />
 
-      {/* PRD 8장: 목록 항목 클릭으로도 수정 다이얼로그(상세보기)가 열려야 한다. */}
+      {/* 항목 클릭은 읽기 전용 상세보기를 연다 — 수정은 연필 아이콘으로만 시작한다. */}
       <button
         type="button"
-        onClick={() => onEdit(todo)}
+        onClick={() => onView(todo)}
         className="-m-1 min-w-0 flex-1 rounded-md p-1 text-left transition-colors outline-none hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <div className="flex flex-wrap items-center gap-2">
