@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { AttachmentThumbnail } from "@/components/todos/attachment-thumbnail";
 
 // FR-F01: 할 일 하나에 최대 5개. 서버가 최종 판정하지만 프론트도 넘는 개수는 아예 업로드를 시도하지 않는다.
-const MAX_ATTACHMENTS = 5;
+export const MAX_ATTACHMENTS = 5;
 
 interface AttachmentPanelProps {
   todoId: number;

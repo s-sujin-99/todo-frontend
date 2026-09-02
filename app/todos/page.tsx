@@ -3,10 +3,11 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
-import { toErrorMessage } from "@/lib/api-client";
+import { toErrorMessage, uploadAttachment } from "@/lib/api-client";
 import type { TodoRequest, TodoResponse, TodoSortOption, TodoStatusFilter } from "@/lib/types";
 import {
   useCreateTodo,
@@ -49,10 +50,12 @@ function TodosPageContent() {
   const pageParam = Number(searchParams.get("page"));
   const page = Number.isInteger(pageParam) && pageParam >= 0 ? pageParam : 0;
 
+  const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTodo, setEditingTodo] = useState<TodoResponse | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [viewingTodo, setViewingTodo] = useState<TodoResponse | null>(null);
+  const [isUploadingAttachments, setIsUploadingAttachments] = useState(false);
 
   function updateParams(next: { status?: TodoStatusFilter; sort?: TodoSortOption; page?: number }) {
     const params = new URLSearchParams(searchParams);
@@ -96,13 +99,32 @@ function TodosPageContent() {
     setDetailOpen(true);
   }
 
-  async function handleDialogSubmit(request: TodoRequest) {
+  async function handleDialogSubmit(request: TodoRequest, files: File[]) {
     try {
       if (editingTodo) {
         await updateMutation.mutateAsync({ id: editingTodo.id, request });
         toast.success("할 일을 수정했습니다.");
       } else {
-        await createMutation.mutateAsync(request);
+        const created = await createMutation.mutateAsync(request);
+        // FR-F03: 생성 폼에서 고른 파일은 todoId가 생긴 뒤에야 업로드할 수 있어 생성 직후 순차 업로드한다.
+        if (files.length > 0) {
+          setIsUploadingAttachments(true);
+          try {
+            const results = await Promise.allSettled(
+              files.map((file) => uploadAttachment(created.id, file)),
+            );
+            const failedCount = results.filter((result) => result.status === "rejected").length;
+            if (failedCount > 0) {
+              toast.error(
+                `할 일은 저장했지만 첨부파일 ${failedCount}개는 업로드하지 못했습니다. 목록에서 다시 시도해주세요.`,
+              );
+            }
+          } finally {
+            setIsUploadingAttachments(false);
+            void queryClient.invalidateQueries({ queryKey: ["attachments", created.id] });
+            void queryClient.invalidateQueries({ queryKey: ["todos"] });
+          }
+        }
         toast.success("할 일을 추가했습니다.");
       }
       setDialogOpen(false);
@@ -174,7 +196,9 @@ function TodosPageContent() {
         onOpenChange={setDialogOpen}
         todo={editingTodo}
         onSubmit={handleDialogSubmit}
-        isSubmitting={createMutation.isPending || updateMutation.isPending}
+        isSubmitting={
+          createMutation.isPending || updateMutation.isPending || isUploadingAttachments
+        }
       />
     </div>
   );

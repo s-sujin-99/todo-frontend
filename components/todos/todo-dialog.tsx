@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AttachmentPanel } from "@/components/todos/attachment-panel";
+import { PendingAttachmentPicker } from "@/components/todos/pending-attachment-picker";
 
 // 다이얼로그를 열 때만 불러온다 — 초기 번들에서 Tiptap을 분리한다(ROADMAP Phase 7 주의).
 const RichTextEditor = dynamic(
@@ -35,7 +36,8 @@ interface TodoDialogProps {
   onOpenChange: (open: boolean) => void;
   /** null이면 생성, 값이 있으면 해당 항목 수정 */
   todo: TodoResponse | null;
-  onSubmit: (request: TodoRequest) => Promise<void>;
+  /** files는 생성 모드에서 함께 선택한 첨부파일이다(수정 모드에서는 항상 빈 배열). */
+  onSubmit: (request: TodoRequest, files: File[]) => Promise<void>;
   isSubmitting: boolean;
 }
 
@@ -67,7 +69,7 @@ export function TodoDialog({ open, onOpenChange, todo, onSubmit, isSubmitting }:
 
 interface TodoFormProps {
   todo: TodoResponse | null;
-  onSubmit: (request: TodoRequest) => Promise<void>;
+  onSubmit: (request: TodoRequest, files: File[]) => Promise<void>;
   isSubmitting: boolean;
 }
 
@@ -76,15 +78,19 @@ function TodoForm({ todo, onSubmit, isSubmitting }: TodoFormProps) {
   const [content, setContent] = useState(todo?.content ?? "");
   const [dueDate, setDueDate] = useState(todo?.dueDate ?? "");
   const [priority, setPriority] = useState<Priority>(todo?.priority ?? "MEDIUM");
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await onSubmit({
-      title,
-      content: content || null,
-      dueDate: dueDate || null,
-      priority,
-    });
+    await onSubmit(
+      {
+        title,
+        content: content || null,
+        dueDate: dueDate || null,
+        priority,
+      },
+      pendingFiles,
+    );
   }
 
   return (
@@ -132,13 +138,15 @@ function TodoForm({ todo, onSubmit, isSubmitting }: TodoFormProps) {
         </div>
       </div>
 
-      {/* FR-F03 주의(ROADMAP Phase 7): 첨부는 todoId가 있어야 업로드할 수 있어 생성 중에는 안내만 보여준다. */}
+      {/* 수정 모드는 todoId가 있어 바로 업로드하고, 생성 모드는 저장 시점에 함께 업로드한다(FR-F03). */}
       {todo ? (
         <AttachmentPanel todoId={todo.id} />
       ) : (
-        <p className="text-xs text-muted-foreground">
-          첨부파일은 저장한 뒤 이 할 일을 다시 열어 추가할 수 있습니다.
-        </p>
+        <PendingAttachmentPicker
+          files={pendingFiles}
+          onFilesChange={setPendingFiles}
+          disabled={isSubmitting}
+        />
       )}
 
       <DialogFooter>
